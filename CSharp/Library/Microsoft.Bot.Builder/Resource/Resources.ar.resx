@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>المرفق '{0}' غير صالح! يجب أن يحتوي نوع المحتوى على '{1}'.</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>يجب تقديم مرفق حيث يكون نوع المحتوى '{0}'.</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>ارجع</value>
   </data>
@@ -97,6 +105,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>لا أفهم, قل شيء</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>يرجى إرسال مرفق ل {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>الرجاء إرسال مجموعة من المرفقات ل {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>تم ربط المرفقات {0}.</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>يمكنك إرسال مرفق واحد أو أكثر.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>مرفق باسم '{0}' مع نوع المحتوى '{1}'.</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>يمكنك إرسال مرفق واحد.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>هل تحب {&amp;}? {||}</value>

@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>L'allegato '{0}' non è valido! Il tipo di contenuto deve contenere '{1}'.</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>Dovresti fornire un allegato dove il tipo di contenuto ha '{0}'.</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>Indietro</value>
   </data>
@@ -97,6 +105,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>Non ho capito. Rispondi qualcosa.</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>Inserisci un allegato per {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>Inserisci una raccolta di allegati per {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0} allegati collegati.</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>Puoi presentare uno o più allegati.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>Allegato denominato '{0}' con il tipo di contenuto '{1}'.</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>Puoi inviare un allegato.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>Desideri {&amp;}? {||}</value>

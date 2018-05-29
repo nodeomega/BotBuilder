@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>El adjunto '{0}' no es válido! El tipo de contenido debe contener '{1}'.</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>Debe proporcionar un archivo adjunto que el tipo de contenido contenga '{0}'.</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>Regresar</value>
   </data>
@@ -52,7 +60,7 @@
     <value>Estado</value>
   </data>
   <data name="CommandStatusHelp" xml:space="preserve">
-    <value>Estado: Muestra el progreso en el llenado de la forma hasta ahora.</value>
+    <value>Estado: Muestra el progreso en el llenado del formulario hasta ahora.</value>
   </data>
   <data name="CommandStatusTerms" xml:space="preserve">
     <value>Estado de progreso; hasta ahora; resultados;estado</value>
@@ -98,6 +106,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>No entendí. Di algo como respuesta.</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>Envíe un archivo adjunto para {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>Envíe una colección de archivos adjuntos para {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0} archivo/s adjunto vinculado.</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>Puede enviar uno o más archivos adjuntos.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>El archivo adjunto denominado '{0}' con el tipo de contenido '{1}'.</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>Puede enviar un archivo adjunto.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>¿Te gustaría un {&amp;}? {||}</value>

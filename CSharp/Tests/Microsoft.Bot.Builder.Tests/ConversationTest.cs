@@ -56,6 +56,7 @@ namespace Microsoft.Bot.Builder.Tests
         protected readonly IBotDataStore<BotData> memoryDataStore = new InMemoryDataStore();
         protected readonly string botId;
         public StateClient StateClient;
+        public OAuthClient OAuthClient;
 
         public MockConnectorFactory(string botId)
         {
@@ -76,6 +77,14 @@ namespace Microsoft.Bot.Builder.Tests
                 this.StateClient = MockIBots(this).Object;
             }
             return this.StateClient;
+        }
+        public IOAuthClient MakeOAuthClient()
+        {
+            if (this.OAuthClient == null)
+            {
+                this.OAuthClient = MockOAuthClient(this).Object;
+            }
+            return this.OAuthClient;
         }
 
         protected IAddress AddressFrom(string channelId, string userId, string conversationId)
@@ -176,6 +185,35 @@ namespace Microsoft.Bot.Builder.Tests
              {
                  return await mockConnectorFactory.GetData(channelId, userId, conversationId, BotStoreType.BotPrivateConversationData);
              });
+
+            return botsClient;
+        }
+        public Mock<OAuthClient> MockOAuthClient(MockConnectorFactory mockConnectorFactory)
+        {
+            var botsClient = new Moq.Mock<OAuthClient>(MockBehavior.Loose);
+
+            botsClient.Setup(d => d.OAuthApi.GetSignInLinkAsync(It.IsAny<IActivity>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns<IActivity, string, CancellationToken>(async (activity, connectionName, token) =>
+                {
+                    return "http://www.cnn.com";
+                });
+
+            botsClient.Setup(d => d.OAuthApi.GetUserTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns<string, string, CancellationToken>(async (userId, connectionName, token) =>
+                {
+                    return new TokenResponse() { Token = "HappyToken", ConnectionName = connectionName };
+                });
+
+            botsClient.Setup(d => d.OAuthApi.SendEmulateOAuthCardsAsync(It.IsAny<bool>()))
+                .Returns<bool>(async (value) =>
+                {
+                });
+
+            botsClient.Setup(d => d.OAuthApi.SignOutUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns<string, string, CancellationToken>(async (userId, connectionName, token) =>
+                {
+                    return true;
+                });
 
             return botsClient;
         }
@@ -307,10 +345,6 @@ namespace Microsoft.Bot.Builder.Tests
                     await Conversation.SendAsync(scope, msg);
                     var reply = scope.Resolve<Queue<IMessageActivity>>().Dequeue();
                     Assert.AreEqual("1:test", reply.Text);
-                    var store = scope.Resolve<CachingBotDataStore>();
-                    Assert.AreEqual(0, store.cache.Count);
-                    var dataStore = scope.Resolve<InMemoryDataStore>();
-                    Assert.AreEqual(3, dataStore.store.Count);
                 }
 
                 for (int i = 0; i < 10; i++)
@@ -322,13 +356,12 @@ namespace Microsoft.Bot.Builder.Tests
                         var reply = scope.Resolve<Queue<IMessageActivity>>().Dequeue();
                         Assert.AreEqual($"{i + 2}:test", reply.Text);
                         var store = scope.Resolve<CachingBotDataStore>();
-                        Assert.AreEqual(0, store.cache.Count);
                         var dataStore = scope.Resolve<InMemoryDataStore>();
-                        Assert.AreEqual(3, dataStore.store.Count);
                         string val = string.Empty;
                         Assert.IsTrue(scope.Resolve<IBotData>().PrivateConversationData.TryGetValue(DialogModule.BlobKey, out val));
                         Assert.AreNotEqual(string.Empty, val);
                     }
+
                 }
             }
         }

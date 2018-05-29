@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Microsoft.Bot.Connector
 {
@@ -28,6 +30,7 @@ namespace Microsoft.Bot.Connector
         IMessageDeleteActivity,
         IMessageReactionActivity,
         ISuggestionActivity,
+        ITraceActivity,
         ITypingActivity,
         IEndOfConversationActivity,
         IEventActivity,
@@ -40,12 +43,8 @@ namespace Microsoft.Bot.Connector
 
         partial void CustomInit()
         {
-            MembersAdded = MembersAdded ?? new List<ChannelAccount>();
-            MembersRemoved = MembersRemoved ?? new List<ChannelAccount>();
             Attachments = Attachments ?? new List<Attachment>();
             Entities = Entities ?? new List<Entity>();
-            ReactionsAdded = ReactionsAdded ?? new List<MessageReaction>();
-            ReactionsRemoved = ReactionsRemoved ?? new List<MessageReaction>();
         }
 
         /// <summary>
@@ -90,7 +89,14 @@ namespace Microsoft.Bot.Connector
         /// <summary>
         /// Create an instance of the Activity class with IConversationUpdateActivity masking
         /// </summary>
-        public static IConversationUpdateActivity CreateConversationUpdateActivity() { return new Activity(ActivityTypes.ConversationUpdate); }
+        public static IConversationUpdateActivity CreateConversationUpdateActivity()
+        {
+            return new Activity(ActivityTypes.ConversationUpdate)
+            {
+                MembersAdded = new List<ChannelAccount>(),
+                MembersRemoved = new List<ChannelAccount>()
+            };
+        }
 
         /// <summary>
         /// Create an instance of the Activity class with ITypingActivity masking
@@ -118,6 +124,30 @@ namespace Microsoft.Bot.Connector
         public static IInvokeActivity CreateInvokeActivity() { return new Activity(ActivityTypes.Invoke); }
 
         /// <summary>
+        /// Create an instance of the TraceActivity 
+        /// </summary>
+        /// <param name="activity">Activity to reply to</param>
+        /// <param name="name">Name of the operation</param>
+        /// <param name="value">value of the operation</param>
+        /// <param name="valueType">valueType if helpful to identify the value schema (default is value.GetType().Name)</param>
+        /// <param name="label">descritive label of context. (Default is calling function name)</param>
+        public static ITraceActivity CreateTraceActivityReply(
+            Activity activity, 
+            string name, 
+            string valueType = null, 
+            object value = null, 
+            [CallerMemberName] string label = null)
+        {
+            ITraceActivity traceActivity = activity == null ? new Activity() : activity.CreateReply();
+            traceActivity.Name = name;
+            traceActivity.Label = label;
+            traceActivity.ValueType = valueType ?? value?.GetType().Name;
+            traceActivity.Value = value;
+            traceActivity.Type = "trace";
+            return traceActivity;
+        }
+
+        /// <summary>
         /// True if the Activity is of the specified activity type
         /// </summary>
         protected bool IsActivity(string activity) { return string.Compare(this.Type?.Split('/').First(), activity, true) == 0; }
@@ -141,6 +171,11 @@ namespace Microsoft.Bot.Connector
         /// Return an IConversationUpdateActivity mask if this is a conversation update activity
         /// </summary>
         public IConversationUpdateActivity AsConversationUpdateActivity() { return IsActivity(ActivityTypes.ConversationUpdate) ? this : null; }
+
+        /// <summary>
+        /// Returns ITraceActivity if this is a trace activity, null otherwise
+        /// </summary>
+        public ITraceActivity AsTraceActivity() { return IsActivity(ActivityTypes.Trace) ? this : null; }
 
         /// <summary>
         /// Return an ITypingActivity mask if this is a typing activity
@@ -446,6 +481,112 @@ namespace Microsoft.Bot.Connector
                 activity.Text = Regex.Replace(activity.Text, mention.Text, "", RegexOptions.IgnoreCase);
             }
             return activity.Text;
+        }
+
+        /// <summary>
+        /// Get OAuthClient appropriate for this activity
+        /// </summary>
+        /// <param name="credentials">credentials for bot to access OAuth api</param>
+        /// <param name="serviceUrl">alternate serviceurl to use for OAuth service</param>
+        /// <param name="handlers"></param>
+        /// <param name="activity"></param>
+        /// <returns></returns>
+        public static OAuthClient GetOAuthClient(this IActivity activity, MicrosoftAppCredentials credentials, string serviceUrl = null, params DelegatingHandler[] handlers)
+        {
+            if (serviceUrl != null)
+                return new OAuthClient(new Uri(serviceUrl), credentials: credentials, handlers: handlers);
+
+            return new OAuthClient(credentials, true, handlers);
+        }
+
+        /// <summary>
+        /// Get OAuthClient appropriate for this activity
+        /// </summary>
+        /// <param name="microsoftAppId"></param>
+        /// <param name="microsoftAppPassword"></param>
+        /// <param name="serviceUrl">alternate serviceurl to use for state service</param>
+        /// <param name="handlers"></param>
+        /// <param name="activity"></param>
+        /// <returns></returns>
+        public static OAuthClient GetOAuthClient(this IActivity activity, string microsoftAppId = null, string microsoftAppPassword = null, string serviceUrl = null, params DelegatingHandler[] handlers) => GetOAuthClient(activity, new MicrosoftAppCredentials(microsoftAppId, microsoftAppPassword), serviceUrl, handlers);
+
+        public static bool IsTokenResponseEvent(this IActivity activity)
+        {
+            return activity.Type == ActivityTypes.Event && ((IEventActivity)activity).Name == TokenOperations.TokenResponseOperationName;
+        }
+
+        public static bool IsTeamsVerificationInvoke(this IActivity activity)
+        {
+            return activity.Type == ActivityTypes.Invoke && ((IInvokeActivity)activity).Name == TokenOperations.TeamsVerificationCode;
+        }
+
+        public static TokenResponse ReadTokenResponseContent(this IActivity activity)
+        {
+            if (IsTokenResponseEvent(activity))
+            {
+                var content = ((IEventActivity)activity).Value as JObject;
+                if (content != null)
+                {
+                    var tokenResponse = content.ToObject<TokenResponse>();
+                    return tokenResponse;
+                }
+            }
+            return null;
+        }
+
+        public static async Task<Activity> CreateOAuthReplyAsync(this IActivity activity, string connectionName, string text, string buttonLabel, bool asSignInCard = false)
+        {
+            var reply = ((Activity)activity).CreateReply();
+
+            switch (activity.ChannelId)
+            {
+                case "msteams":
+                case "cortana":
+                case "skype":
+                case "skypeforbusiness":
+                    asSignInCard = true;
+                    break;
+            }
+
+            if (asSignInCard)
+            {
+                var client = GetOAuthClient(activity);
+                var link = await client.OAuthApi.GetSignInLinkAsync(activity, connectionName);
+                reply.Attachments = new List<Attachment>() {
+                    new Attachment()
+                    {
+                        ContentType = SigninCard.ContentType,
+                        Content = new SigninCard()
+                        {
+                            Text = text,
+                            Buttons = new CardAction[]
+                            {
+                                new CardAction() { Title = buttonLabel, Value = link, Type = ActionTypes.Signin }
+                            },
+                        }
+                    }
+                };
+            }
+            else
+            {
+                reply.Attachments = new List<Attachment>() {
+                    new Attachment()
+                    {
+                        ContentType = OAuthCard.ContentType,
+                        Content = new OAuthCard()
+                        {
+                            Text = text,
+                            ConnectionName = connectionName,
+                            Buttons = new CardAction[]
+                            {
+                                new CardAction() { Title = buttonLabel, Type = ActionTypes.Signin }
+                            },
+                        }
+                    }
+                };
+            }
+
+            return reply;
         }
     }
 }

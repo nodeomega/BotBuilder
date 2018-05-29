@@ -61,6 +61,7 @@ export interface IChatConnectorSettings {
     gzipData?: boolean;
     endpoint?: IChatConnectorEndpoint;
     stateEndpoint?: string;
+    oAuthEndpoint?: string;
     openIdMetadata?: string;
 }
 
@@ -77,6 +78,7 @@ export interface IChatConnectorEndpoint {
     emulatorAuthV32IssuerV2: string;
     emulatorAudience: string;
     stateEndpoint: string;
+    oAuthEndpoint: string;
 }
 
 export interface IChatConnectorAddress extends IAddress {
@@ -115,7 +117,8 @@ export class ChatConnector implements IConnector, IBotStorage {
                 emulatorAuthV31IssuerV2: 'https://login.microsoftonline.com/d6d49420-f39b-4df7-a1dc-d59a935871db/v2.0',
                 emulatorAuthV32IssuerV1: 'https://sts.windows.net/f8cdef31-a31e-4b4a-93e4-5f571e91255a/',
                 emulatorAuthV32IssuerV2: 'https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a/v2.0',
-                stateEndpoint: this.settings.stateEndpoint || 'https://state.botframework.com'
+                stateEndpoint: this.settings.stateEndpoint || 'https://state.botframework.com',
+                oAuthEndpoint: this.settings.oAuthEndpoint || 'https://api.botframework.com',
             }
         }
 
@@ -162,7 +165,7 @@ export class ChatConnector implements IConnector, IBotStorage {
 
         // Verify token
         if (token) {
-            let decoded = jwt.decode(token, { complete: true });
+            let decoded = jwt.decode(token, { complete: true }) as any;
             var verifyOptions: jwt.VerifyOptions;
             var openIdMetadata: OpenIdMetadata;
             const algorithms: string[] = ['RS256', 'RS384', 'RS512'];
@@ -302,7 +305,7 @@ export class ChatConnector implements IConnector, IBotStorage {
             } catch (e) {
                 cb(e);
             }
-        }, (err) => done(err, !err ? addresses : null));
+        }, (err: Error) => done(err, !err ? addresses : null));
     }
 
     public startConversation(address: IStartConversationAddress, done: (err: Error, address?: IAddress) => void): void {
@@ -380,7 +383,138 @@ export class ChatConnector implements IConnector, IBotStorage {
         this.authenticatedRequest(options, (err, response, body) => done(err));
     }
 
+    public getConversations(serviceUrl: string, continuationToken: string|undefined, done: (err: Error, results: IConversationsResult) => void): void {
+        // Calculate path
+        var path = '/v3/conversations';
+        if (continuationToken) { path += '?continuationToken=' + encodeURIComponent(continuationToken) }
 
+        // Issue request
+        var options: request.Options = {
+            method: 'GET',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(serviceUrl, path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err, body));
+    }
+
+    public deleteConversationMember(serviceUrl: string, conversationId: string, memberId: string, done: (err: Error) => void): void {
+        // Calculate path
+        var path = '/v3/conversations/' + encodeURIComponent(conversationId) + 
+            '/members/' + encodeURIComponent(memberId);
+
+        // Issue request
+        var options: request.Options = {
+            method: 'DELETE',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(serviceUrl, path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err));
+    }
+
+    public exportBotStateData(serviceUrl: string, channelId: string, continuationToken: string|undefined, done: (err: Error, results: IBotStateDataResult) => void): void {
+        // Calculate path
+        var path = '/v3/botstate/' + channelId + '/exportBotStateData';
+        if (continuationToken) { path += '?continuationToken=' + encodeURIComponent(continuationToken) }
+
+        // Issue request
+        var options: request.Options = {
+            method: 'GET',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(serviceUrl, path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err, body));
+    }
+
+    public getUserToken(address: IChatConnectorAddress, connectionName: string, magicCode: string|undefined, done: (err: Error, results: ITokenResponse) => void): void {
+        // Calculate path
+        var path = 'api/usertoken/GetToken?userId=' + encodeURIComponent(address.user.id);
+        path += '&connectionName=' + encodeURIComponent(connectionName);
+        if (magicCode) { path += '&code=' + encodeURIComponent(magicCode) }
+
+        // Issue request
+        var options: request.Options = {
+            method: 'GET',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(this.getOAuthPath(address), path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err, body));
+    }
+
+    public signOutUser(address: IChatConnectorAddress, connectionName: string, done: (err: Error) => void): void {
+        // Calculate path
+        var path = 'api/usertoken/SignOut?userId=' + encodeURIComponent(address.user.id);
+        path += '&connectionName=' + encodeURIComponent(connectionName);
+
+        // Issue request
+        var options: request.Options = {
+            method: 'DELETE',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(this.getOAuthPath(address), path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err));
+    }
+
+    public getSignInLink(address: IChatConnectorAddress, connectionName: string, done: (err: Error, link: string) => void): void {
+        // Construct state object
+        const state = {
+            ConnectionName: connectionName,
+            Conversation: {
+                activityId: address.id,
+                bot: address.bot,
+                channelId: address.channelId,
+                conversation: address.conversation,
+                serviceUrl: address.serviceUrl,
+                user: address.user   
+            },
+            MsAppId: this.settings.appId
+        };
+        const finalState = Buffer.from(JSON.stringify(state)).toString('base64');
+  
+        // Calculate path
+        var path = 'api/botsignin/getsigninurl?state=' + encodeURIComponent(finalState);
+
+        // Issue request
+        var options: request.Options = {
+            method: 'GET',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(this.getOAuthPath(address), path)
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err, body));
+    }
+
+    public emulateOAuthCards(serviceUrl: string, emulate: boolean, done: (err: Error) => void): void {
+        // Calculate path
+        var path = 'api/usertoken/emulateOAuthCards?emulate=' + (!!emulate).toString();
+
+        // Issue request
+        var options: request.Options = {
+            method: 'POST',
+            // We use urlJoin to concatenate urls. url.resolve should not be used here,
+            // since it resolves urls as hrefs are resolved, which could result in losing
+            // the last fragment of the serviceUrl
+            url: urlJoin(serviceUrl, path),
+            json: true
+        };
+        this.authenticatedRequest(options, (err, response, body) => done(err));
+    }
+    
     public getData(context: IBotStorageContext, callback: (err: Error, data: IChatConnectorStorageData) => void): void {
         try {
             console.warn(StateApiDreprecatedMessage);
@@ -647,7 +781,7 @@ export class ChatConnector implements IConnector, IBotStorage {
         });
     }
 
-    private authenticatedRequest(options: request.Options, callback: (error: any, response: http.IncomingMessage, body: any) => void, refresh = false): void {
+    private authenticatedRequest(options: request.OptionsWithUrl, callback: (error: any, response: http.IncomingMessage, body: any) => void, refresh = false): void {
         if (refresh) {
             this.accessToken = null;
         }
@@ -710,6 +844,7 @@ export class ChatConnector implements IConnector, IBotStorage {
                 };
                 this.addUserAgent(opt);
                 request(opt, (err, response, body) => {
+                    this.refreshingToken = undefined;
                     if (!err) {
                         if (body && response.statusCode < 300) {
                             // Subtract 5 minutes from expires_in so they'll we'll get a
@@ -717,7 +852,6 @@ export class ChatConnector implements IConnector, IBotStorage {
                             var oauthResponse = JSON.parse(body);
                             this.accessToken = oauthResponse.access_token;
                             this.accessTokenExpires = new Date().getTime() + ((oauthResponse.expires_in - 300) * 1000);
-                            this.refreshingToken = undefined;
                             resolve(this.accessToken);
                         } else {
                             reject(new Error('Refresh access token failed with status code: ' + response.statusCode));
@@ -726,7 +860,10 @@ export class ChatConnector implements IConnector, IBotStorage {
                         reject(err);
                     }
                 });
-            })
+            }).catch((err) => {
+                this.refreshingToken = undefined;
+                throw err;
+            });
         }
         this.refreshingToken.then((token) => cb(null, token), (err) => cb(err, null));
     }
@@ -797,6 +934,10 @@ export class ChatConnector implements IConnector, IBotStorage {
 
         // Append base path info.
         return path + '/v3/botstate/' + encodeURIComponent(address.channelId);
+    }
+
+    private getOAuthPath(address: IChatConnectorAddress): string {
+        return this.settings.endpoint.oAuthEndpoint;
     }
 
     private prepIncomingMessage(msg: IMessage): void {
@@ -918,3 +1059,5 @@ interface IWebResponse {
 interface IWebMiddleware {
     (req: IWebRequest, res: IWebResponse, next: Function): void;
 }
+
+

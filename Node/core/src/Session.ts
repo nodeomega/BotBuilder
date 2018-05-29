@@ -189,7 +189,7 @@ export class Session extends events.EventEmitter {
     }
 
     /** Gets/sets the users preferred locale. */
-    public preferredLocale(locale?: string, callback?: ErrorCallback): string {
+    public preferredLocale(locale?: string, callback?: async.ErrorCallback<any>): string {
         if (locale) {
             this._locale = locale;
             if (this.userData) {
@@ -462,7 +462,7 @@ export class Session extends events.EventEmitter {
         return this;
     }
 
-    /** Cancels a specific dialog on teh stack and optionally replaces it with a new one. */
+    /** Cancels a specific dialog on the stack and optionally replaces it with a new one. */
     public cancelDialog(dialogId: string|number, replaceWithId?: string, replaceWithArgs?: any): this {
         // Delete dialog(s)
         var childId = typeof dialogId === 'number' ? this.sessionState.callstack[<number>dialogId].id : <string>dialogId;
@@ -774,7 +774,7 @@ export class Session extends events.EventEmitter {
             } else {
                 cb(new Error("'" + variable + "' isn't watchable."));
             }
-        }, (err) => {
+        }, (err: Error) => {
             // Flush logs
             if (err) {
                 this.logger.error(this.dialogStack(), err);

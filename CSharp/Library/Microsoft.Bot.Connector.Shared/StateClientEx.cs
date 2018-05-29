@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.Rest;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 
 #if NET45
 using System.Security.Claims;
@@ -31,11 +34,11 @@ namespace Microsoft.Bot.Connector
         /// </summary>
         /// <param name="baseUri">Base URI for the State service</param>
         /// <param name="credentials">Credentials for the Connector service</param>
-        /// <param name="addJwtTokenRefresher">True, if JwtTokenRefresher should be included; False otherwise.</param>
+        /// <param name="addJwtTokenRefresher">(DEPRECATED)</param>
         /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
         [Obsolete("The StateAPI is being deprecated.  Please refer to https://aka.ms/yr235k for details on how to replace with your own storage.", false)]
         public StateClient(Uri baseUri, MicrosoftAppCredentials credentials, bool addJwtTokenRefresher = true, params DelegatingHandler[] handlers)
-            : this(baseUri, addJwtTokenRefresher ? AddJwtTokenRefresher(handlers, credentials) : handlers)
+            : this(baseUri, handlers)
         {
             this.Credentials = credentials;
         }
@@ -81,25 +84,21 @@ namespace Microsoft.Bot.Connector
         /// </summary>
         /// <remarks> This constructor will use https://state.botframework.com as the baseUri</remarks>
         /// <param name="credentials">Credentials for the Connector service</param>
-        /// <param name="addJwtTokenRefresher">True, if JwtTokenRefresher should be included; False otherwise.</param>
+        /// <param name="addJwtTokenRefresher">(DEPRECATED)</param>
         /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
         [Obsolete("The StateAPI is being deprecated.  Please refer to https://aka.ms/yr235k for details on how to replace with your own storage.", false)]
         public StateClient(MicrosoftAppCredentials credentials, bool addJwtTokenRefresher = true, params DelegatingHandler[] handlers)
-            : this(addJwtTokenRefresher ? AddJwtTokenRefresher(handlers, credentials) : handlers)
+            : this(handlers)
         {
             this.Credentials = credentials;
         }
 
-        private static DelegatingHandler[] AddJwtTokenRefresher(DelegatingHandler[] srcHandlers, MicrosoftAppCredentials credentials)
+        internal static string GetClientVersion<T>(T client) where T : ServiceClient<T>
         {
-            var handlers = new List<DelegatingHandler>(srcHandlers);
-            handlers.Add(new JwtTokenRefresher(credentials));
-            return handlers.ToArray();
+            var type = client.GetType();
+            var assembly = type.GetTypeInfo().Assembly;
+            return assembly.GetName().Version.ToString();
         }
 
-        partial void CustomInitialize()
-        {
-            ConnectorClient.AddUserAgent(this);
-        }
     }
 }

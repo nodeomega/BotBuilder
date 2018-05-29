@@ -88,7 +88,7 @@ namespace Microsoft.Bot.Connector
         /// <summary>
         /// Get the channel data as strongly typed object
         /// </summary>
-        /// <typeparatm name="TypeT"></typeparam>
+        /// <typeparam name="TypeT"></typeparam>
         /// <returns></returns>
         TypeT GetChannelData<TypeT>();
 
@@ -159,5 +159,11 @@ namespace Microsoft.Bot.Connector
         /// Returns IMessageDeleteActivity if this is a message delete activity, null otherwise
         /// </summary>
         ISuggestionActivity AsSuggestionActivity();
+
+        /// <summary>
+        /// Returns ITraceActivity if this is a trace activity, null otherwise
+        /// </summary>
+        ITraceActivity AsTraceActivity();
+
     }
 }

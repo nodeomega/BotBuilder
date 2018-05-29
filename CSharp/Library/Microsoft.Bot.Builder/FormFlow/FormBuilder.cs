@@ -31,9 +31,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Microsoft.Bot.Builder.FormFlow.Advanced;
-using Microsoft.Bot.Builder.Resource;
-using Microsoft.Bot.Connector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,9 +39,11 @@ using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
-using Microsoft.Bot.Builder.Dialogs;
 using System.Threading.Tasks;
-using System.Text;
+
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow.Advanced;
+using Microsoft.Bot.Builder.Resource;
 
 namespace Microsoft.Bot.Builder.FormFlow
 {
@@ -100,7 +99,7 @@ namespace Microsoft.Bot.Builder.FormFlow
                     _form.Localize(rs.GetEnumerator(), out missing, out extra);
                     if (missing.Any())
                     {
-                        throw new MissingManifestResourceException($"Missing resources {missing}");
+                        throw new MissingManifestResourceException($"Missing {missing.Count()} resources {string.Join(", ", missing)}");
                     }
                 }
             }
@@ -184,7 +183,15 @@ namespace Microsoft.Bot.Builder.FormFlow
 
         private Dictionary<TemplateUsage, int> _templateArgs = new Dictionary<TemplateUsage, int>
         {
-            {TemplateUsage.Bool, 0 },
+            { TemplateUsage.AttachmentCollection, 0 },
+            { TemplateUsage.AttachmentCollectionDescription, 1 },
+            { TemplateUsage.AttachmentCollectionHelp, 1 },
+            { TemplateUsage.AttachmentContentTypeValidatorError, 2 },
+            { TemplateUsage.AttachmentContentTypeValidatorHelp, 1 },
+            { TemplateUsage.AttachmentField, 0 },
+            { TemplateUsage.AttachmentFieldDescription, 2 },
+            { TemplateUsage.AttachmentFieldHelp, 1 },
+            { TemplateUsage.Bool, 0 },
             { TemplateUsage.BoolHelp, 1},
             { TemplateUsage.Clarify, 1},
             { TemplateUsage.Confirmation, 0 },
@@ -454,7 +461,7 @@ namespace Microsoft.Bot.Builder.FormFlow
         private void FieldPaths(Type type, string path, List<string> paths)
         {
             var newPath = (path == "" ? path : path + ".");
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => !f.IsDefined(typeof(IgnoreFieldAttribute))))
             {
                 TypePaths(field.FieldType, newPath + field.Name, paths);
             }
@@ -472,7 +479,7 @@ namespace Microsoft.Bot.Builder.FormFlow
         {
             if (type.IsClass)
             {
-                if (type == typeof(string))
+                if (type == typeof(string) || type.IsAttachmentType())
                 {
                     paths.Add(path);
                 }
@@ -492,6 +499,10 @@ namespace Microsoft.Bot.Builder.FormFlow
                 {
                     FieldPaths(type, path, paths);
                 }
+            }
+            else if (type.IsAttachmentCollection())
+            {
+                paths.Add(path);
             }
             else if (type.IsEnum)
             {

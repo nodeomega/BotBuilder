@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>Příloha '{0}' je neplatná! Obsahový typ by měl obsahovat '{1}'.</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>Měli byste zadat přílohu, kde má typ obsahu '{0}'.</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>Zpět</value>
   </data>
@@ -98,6 +106,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>Tomu nerozumím,zkuste to ještě jednou.</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>Předložte přílohu pro {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>Předložte soubor příloh pro {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0} připojené přílohy.</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>Můžete odeslat jednu nebo více příloh.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>Příloha s názvem '{0}' typem obsahu'{1}'.</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>Můžete odeslat jednu přílohu.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>Chcete {&amp;}? {||}</value>

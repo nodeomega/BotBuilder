@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>附件“{0}”无效！ 内容类型应包含“{1}”。</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>您应该提供内容类型为“{0}”的附件。</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>返回</value>
   </data>
@@ -97,6 +105,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>不好意思，我没听懂. 请换一种表达</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>请提交{&amp;}的附件</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>请提交{&amp;}的附件集合</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0}个连结的附件。</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>您可以提交一个或多个附件。{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>附件名为“{0}”，内容类型为“{1}”。</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>您可以提交一个附件。{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>您是需要 {&amp;}? {||}</value>

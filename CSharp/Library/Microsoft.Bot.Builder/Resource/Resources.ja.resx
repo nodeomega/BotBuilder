@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>添付ファイル '{0}'は無効です！ コンテンツタイプには '{1}'が含まれている必要があります。</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>コンテンツタイプが '{0}'の添付ファイルを提供する必要があります。</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>戻る</value>
   </data>
@@ -97,6 +105,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>わからない。何か返答して下さい。</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>{&amp;}の添付ファイルを提出してください</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>{&amp;}の添付ファイルのコレクションを提出してください</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0}添付ファイルがリンクされています。</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>1つまたは複数の添付ファイルを送信できます。{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>コンテンツタイプ '{1}'の「{0}」という名前の添付ファイル。</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>添付ファイルを1つ送信することができます。{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>{&amp;} 欲しいですか{||}</value>

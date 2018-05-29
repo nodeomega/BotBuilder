@@ -12,6 +12,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AttachmentContentTypeValidatorError" xml:space="preserve">
+    <value>Bijlage '{0}' is ongeldig! Het inhoudstype moet '{1}' bevatten.</value>
+    <comment>0-attachmnet name, 1-expected content-type</comment>
+  </data>
+  <data name="AttachmentContentTypeValidatorHelp" xml:space="preserve">
+    <value>U moet een bijlage geven waar het inhoudstype '{0}' heeft.</value>
+    <comment>0-attachment content type</comment>
+  </data>
   <data name="CommandBack" xml:space="preserve">
     <value>Terug</value>
   </data>
@@ -103,6 +111,28 @@
   </data>
   <data name="PromptRetry" xml:space="preserve">
     <value>Dat begrijp ik niet. Probeer het anders te zeggen.</value>
+  </data>
+  <data name="TemplateAttachment" xml:space="preserve">
+    <value>Stuur een bijlage voor {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollection" xml:space="preserve">
+    <value>Stuur een verzameling bijlagen voor {&amp;}</value>
+  </data>
+  <data name="TemplateAttachmentCollectionDescription" xml:space="preserve">
+    <value>{0} bijlagen gekoppeld.</value>
+    <comment>0-attachments count</comment>
+  </data>
+  <data name="TemplateAttachmentCollectionHelp" xml:space="preserve">
+    <value>U kunt een of meer bijlagen indienen.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
+  </data>
+  <data name="TemplateAttachmentDescription" xml:space="preserve">
+    <value>Bijlage met de naam '{0}' met inhoudstype '{1}'.</value>
+    <comment>0-attachment name, 1-attachment content-type</comment>
+  </data>
+  <data name="TemplateAttachmentHelp" xml:space="preserve">
+    <value>U kunt een bijlage indienen.{0}</value>
+    <comment>0-dynamic help from attachment class</comment>
   </data>
   <data name="TemplateBool" xml:space="preserve">
     <value>Wil je een {&amp;}? {||}</value>
